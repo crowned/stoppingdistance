@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+  	<meta charset="utf-8">
+  	<title>Motorcycle Dynamics</title>
+  	<link rel="stylesheet" href="jquery-ui-1.10.3/themes/base/jquery.ui.all.css">
+  	<link rel="stylesheet" href="css/motorcycles.css">
+  	<script src="jquery-ui-1.10.3/jquery-1.9.1.js"></script>
+  	<script src="jquery-ui-1.10.3/ui/jquery.ui.core.js"></script>
+  	<script src="jquery-ui-1.10.3/ui/jquery.ui.widget.js"></script>
+  	<script src="jquery-ui-1.10.3/ui/jquery.ui.mouse.js"></script>
+  	<script src="jquery-ui-1.10.3/ui/jquery.ui.draggable.js"></script>
+  	<script src="jquery-ui-1.10.3/ui/jquery.ui.slider.js"></script>
+  	<link rel="stylesheet" href="jquery-ui-1.10.3/demos/demos.css">
+  
+  	<script>
+  	
+    $(function() {
+      
+      $( "#speed-slider" ).slider({
+        orientation: "vertical",
+        range: "min",
+        value: 60,
+        min: 0,
+        max: 185,
+  			step: 5,
+  
+        slide: function( event, ui ) {
+          $( "#speed-slider-value" ).val( ui.value + " mph");
+          timeoutID = window.setTimeout(updateBrakingValues, 10);
+  
+      }});
+          
+      $( "#speed-slider-value" ).val($( "#speed-slider" ).slider( "value" )+" mph");
+  
+      $( "#grip-slider" ).slider({
+        orientation: "vertical",
+        range: "min",
+        value: 1.10,
+        min: 0,
+        max: 1.6,
+        step: 0.01,
+  			  
+  		  slide: function( event, ui ) {
+          $( "#grip-slider-value" ).val( ui.value);
+          timeoutID = window.setTimeout(updateBrakingValues, 10);
+      }});
+  		
+  		$( "#grip-slider-value" ).val($( "#grip-slider" ).slider( "value" ) );        
+  		
+  		$( "#draggable" ).draggable({ 
+        containment: "#containment-wrapper", scroll: false, 
+  			
+  			start: function() {
+        },
+  			
+  			drag: function() {
+          timeoutID = window.setTimeout(updateBrakingValues, 10);
+  			},
+  			
+  			stop: function() {
+          timeoutID = window.setTimeout(updateBrakingValues, 10);
+  			}
+  		}
+  			
+  	);
+  		//set constants
+  		
+  	  gravity = 32.17 //feet per second squared
+  		var wheelbase = 55.5; //inches
+      var pixelwheelbase = $('#containment-wrapper').width()-$('.draggable').width();
+      pixelheight = $('#containment-wrapper').height()-$('.draggable').height();
+      
+  	  function updateBrakingValues() {
+        var position = $("#draggable").position();
+        var xPos = wheelbase*(pixelwheelbase-position.left)/(pixelwheelbase);
+        var yPos = (pixelheight-position.top)/pixelheight*wheelbase*pixelheight/pixelwheelbase;
+  			//set variables
+  			
+  			var initialSpeed = $( "#speed-slider" ).slider( "values", 1 ) * 88/60;
+  			var finalSpeed = $( "#speed-slider" ).slider( "values", 0 ) * 88/60;
+  			var mu = $( "#grip-slider" ).slider( "values", 0 );
+  
+  
+  			//calculate theoretical braking distance (using all traction)
+  			var theoreticalStop = Math.pow(initialSpeed, 2)/(2*gravity*(mu));
+  						
+  			//max braking force before stoppie:
+  			var stoppieGs = xPos/(yPos);
+  			
+  			//max braking usable braking force--either stoppie or all traction
+  			var maxBraking = Math.min(mu, stoppieGs);
+  			
+  			//calculate actual braking distance
+  			var actualStop = Math.pow(initialSpeed, 2)/(2*gravity*(maxBraking));
+  			
+  			//write limiting factor
+  			if (mu < stoppieGs)
+          var limitingFactor = "Limiting-factor: Grip.  The bike will skid before it stoppies.";
+  				
+  			else
+          var limitingFactor = "Limiting-factor: Center of gravity. The bike will stoppie before using all available traction.";
+  			if (xPos == 0)
+  				var limitingFactor = "The center of gravity is directly over the contact patch (unrealistic).  It is impossible to brake at all without doing an uncontrollable stoppie.";
+  			if (yPos == 0)
+  				var limitingFactor = "The center of gravity is directly behind the contact patch (unrealistic).  No matter how much grip the bike has, it cannot raise the rear wheel."
+  			if ((yPos == 0) && (xPos == 0))
+  				var limitingFactor = "The center of gravity is at the contact patch (unrealistic).  The bike could brake hard without doing a stoppie.";
+  			
+  			//update notes
+        // $('#xPos').text(xPos + "\"");
+        // $('#yPos').text(yPos + "\"");
+        // $('#initialSpeed').text(initialSpeed + " fps");
+        // $('#finalSpeed').text(finalSpeed + " fps");
+        // $('#grip').text(mu);
+  			// $('#grade').text(grade + " %");
+  			$('#stopping-distance-actual').text(actualStop.toFixed(1)+ "\'");
+  			$('#stopping-distance-theoretical').text(theoreticalStop.toFixed(1)+"\'");
+  			$('#limiting-factor').html(limitingFactor);
+  			
+  			//update graph
+  			$("#stopping-bar-actual").css({width: actualStop/3});
+  			$("#stopping-bar-theoretical").css({width: theoreticalStop/3});
+  			
+  			//rotate critical Cg line:
+        var $elies = $("#cg-line");
+  			
+  			rotate($elies, (Math.PI/2)*180/Math.PI-Math.atan(mu)*180/Math.PI);
+        function rotate(element, degree) {
+          // For webkit browsers: e.g. Chrome
+          element.css({ WebkitTransform: 'rotate(' + degree + 'deg)'});
+          // For Mozilla browser: e.g. Firefox
+          element.css({ '-moz-transform': 'rotate(' + degree + 'deg)'});
+        }
+  
+  		}
+  			
+      updateBrakingValues();
+  		
+  	});
+  	</script>
+  </head>
+  <body>
+  
+    <h2>Is your stop limited by grip or center of gravity?</h2>
+    Instructions:  Reposition the bike's center of gravity symbol (between his leg  and the tank) and move the sliders.
+  
+    <ul id="test">
+  	  <li>
+  	    <div id="scene">
+  		    <div id="limiting-factor"></div>
+  		    <div id="motorcyclist">	
+  		    </div>
+  		    <div id="containment-wrapper">
+  			    <div id="draggable" class="draggable"></div>	
+  		    </div>
+          <div id="cg-line">
+  		      <div id="cg-line-filler"></div>
+            <span id="cg-line-text">Cg-limited above this line (stoppie)<br>Traction-limited below this line (skid)</span>
+          </div>
+        </div>
+      </li>
+      <li class="slider">
+  		  <p>
+          <label for="speed-slider-value">Braking:</label>
+          <input type="text" id="speed-slider-value" />
+        </p>
+   
+        <div id="speed-slider" style="height: 200px;"></div>
+      </li>
+      <li class="slider">
+        <p>
+          <label for="grip-slider-value">Grip (mu):</label>
+          <input type="text" id="grip-slider-value" />
+        </p>
+  
+        <div id="grip-slider" style="height: 200px;"></div>
+      </li>
+      <li id="graph">
+        <label for="stopping-distance-actual">Actual stopping distance: </label>
+  		  <div  class="stopping-bar" id="stopping-bar-actual">
+  		    <span id="stopping-distance-actual"></span>
+  		  </div>
+        <label for="stopping-distance-theoretical">Stopping distance with all available grip: </label>
+  		  <div class="stopping-bar" id="stopping-bar-theoretical">
+  		    <span id="stopping-distance-theoretical"></span>
+  		  </div>
+  		  <br>
+  	  </li>
+    </ul>
+  
+  
+  
+  <!-- <label for="xPos">X-pos: </label>
+  <span id="xPos"></span>
+  <br>
+  
+  <label for="yPos">Y-pos: </label>
+  <span id="yPos"></span>
+  <br>
+  
+  <label for="initialSpeed">Initial Speed: </label>
+  <span id="initialSpeed"></span>
+  <br>
+  
+  <label for="finalSpeed">Final Speed: </label>
+  <span id="finalSpeed"></span>
+  <br>
+  
+  <label for="grip">Grip (mu): </label>
+  <span id="grip"></span>
+  <br>
+  
+  <label for="grade">Grade: </label>
+  <span id="grade"></span>
+  <br>
+   -->
+  
+  </body>
+</html>
