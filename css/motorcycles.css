@@ -1,0 +1,126 @@
+
+/*Center of Gravity thing*/
+	.draggable { width: 20px; height: 20px; float: left; margin: 0; }
+	#draggable { 
+				background-color : transparent; 
+				background-image: url("../images/cg.png");
+				background-size: 20px 20px;
+				top: 100px;
+				position: relative;
+				left: 147px;
+				top: 211px;
+
+				
+		
+}
+	#draggable { cursor: n-resize; }
+
+/*Scene and sliders*/
+	ul#test{
+		width:960px;
+		padding:0px;
+		position:relative;
+
+	}
+	ul#test li{
+		display: inline-block;
+		border:1px solid gray;
+		vertical-align:top;
+	}
+	#grip-slider-value, #speed-slider-value{
+		border: 0; color: #f6931f; font-weight: bold;
+		width:70px;
+	}
+	#grip-slider, #speed-slider{
+		margin-left:20%;
+	}
+
+/*graph*/
+
+	li#graph{
+		position: absolute;
+		overflow: hidden;
+		top: 250px;
+		left: 650px;
+		width: 308px;	
+	}
+	
+	.stopping-bar{
+		height: 50px;
+		font-size:3em;
+		padding-top:10px;
+	}
+	#stopping-bar-actual{
+		background-color:#F60018;
+	}
+		
+	#stopping-bar-theoretical{
+		background-color:#00A383;
+	}
+
+/*Scene*/
+	#scene { width: 640px; 
+		height:480px;
+		border:2px solid #ccc;
+		padding:0px;
+		background-image: url("../images/honda.jpg");
+		position:relative;
+		overflow:hidden}
+	#limiting-factor{
+		color: #ccc;
+		font-size: 1.2em;
+		position: absolute;
+		top: 18px;
+		left: 450px;
+		width: 150px;
+		text-align: left;
+	}
+	
+	#motorcyclist{
+		width: 640px; 
+		height:480px;
+		background-image: url("../images/honda.jpg"); 
+		
+	}
+		
+	#containment-wrapper{
+		width: 354px;
+		height: 422px;
+		position: absolute;
+		left: 143px;
+		top: 47px;
+		z-index: 2;
+		border: 0;
+		}
+		
+
+	
+/*Center of Gravity Line*/
+	#cg-line{
+		height: 1px;
+		width: 600px;
+		position: absolute;
+		top: 459px;
+		left: 188px;
+/*		z-index: 1;*/
+	}
+	#cg-line-filler{
+
+		border-top:dotted yellow 3px;
+		height:1px;
+		width:300px;
+	}
+	#cg-line-text{
+		color: yellow;
+		position: relative;
+		line-height:2.2em;
+		font-size:1.1em;
+		top:-28px;
+		left: 60px;
+		
+		-webkit-user-select: none; /* Chrome/Safari */        
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* IE10+ */
+		
+	}
+		
